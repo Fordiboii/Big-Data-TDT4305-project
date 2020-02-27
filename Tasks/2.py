@@ -1,4 +1,5 @@
 import findspark
+import base64
 findspark.init("/home/fordiboii/spark")
 
 from pyspark import SparkContext, SparkConf
@@ -13,6 +14,17 @@ def distinctUsers(rdd):
     newRdd = rdd.map(lambda x: x.split()[1]).distinct()
     return newRdd.count()
 
-reviewersTextFile = sc.textFile(reviewerspath)
+"""2 b) How many what is the average number of the characters in a user review """
+def avgNumOfCharsInReview(rdd):
+    newRdd = rdd.map(lambda x: x.split()[3]).filter(lambda y: y != u'"review_text"')
+    numberOfReviews = newRdd.count()
+    totalLength = newRdd.map(lambda review: len(base64.b64decode(review))).reduce(lambda a, b: a + b)
+    return totalLength/numberOfReviews
 
-print(distinctUsers(reviewersTextFile))
+if __name__ == "__main__":
+    reviewersTextFile = sc.textFile(reviewerspath)
+
+    #print("2 a) Distinct users: ")
+    #print(distinctUsers(reviewersTextFile))
+    print("2 b) Avg. no. of chars in review: ")
+    print(avgNumOfCharsInReview(reviewersTextFile))
