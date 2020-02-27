@@ -1,10 +1,6 @@
 import findspark
-<<<<<<< HEAD
-findspark.init("/home/olekfur/spark")
-=======
 import base64
 findspark.init("/home/fordiboii/spark")
->>>>>>> 0d56ff2d61c01c20b48b0736146ea12729a01232
 
 from pyspark import SparkContext, SparkConf
 
@@ -18,7 +14,6 @@ def distinctUsers(rdd):
     newRdd = rdd.map(lambda x: x.split()[1]).distinct()
     return newRdd.count()
 
-<<<<<<< HEAD
 # 2 c) What is the business_id of the top 10 businesses with the most reviews
 def distinctBusinesses(rdd):
     newRdd = rdd.map(lambda x: x.split()[2]).distinct()
@@ -44,4 +39,3 @@ if __name__ == "__main__":
     #print(distinctUsers(reviewersTextFile))
     print("2 b) Avg. no. of chars in review: ")
     print(avgNumOfCharsInReview(reviewersTextFile))
->>>>>>> 0d56ff2d61c01c20b48b0736146ea12729a01232
