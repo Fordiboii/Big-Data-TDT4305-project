@@ -40,4 +40,16 @@ def top10BusinessesWithMostReviews():
         print(business[0])
         print(business[1])
 
-top10BusinessesWithMostReviews()
+# 2 e) What is the time and date of the first and last review
+
+def timeAndDateOfFirstAndLastReview():
+    print("e): Time and date of first and last review")
+    textFile = sc.textFile(reviewerspath)
+    headers = textFile.first()
+    textFile = textFile.filter(lambda line: line != headers)
+    reviewLinesRdd = textFile.map(lambda line: line.split('\t'))
+    reviewDatesRdd = reviewLinesRdd.map(lambda fields: (fields[4]))
+    minTime = reviewDatesRdd.reduce(lambda time1, time2: time1 if time1<time2 else time2)
+    maxTime = reviewDatesRdd.reduce(lambda time1, time2: time1 if time1>time2 else time2)
+    print("MinTime: " + str(minTime))
+    print("MaxTime: " + str(maxTime))
