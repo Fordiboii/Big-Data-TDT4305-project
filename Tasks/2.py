@@ -1,6 +1,6 @@
 import findspark
 import base64
-findspark.init("/home/fordiboii/spark")
+findspark.init("/home/olekfur/spark")
 
 from pyspark import SparkContext, SparkConf
 
@@ -30,14 +30,14 @@ if __name__ == "__main__":
     print(avgNumOfCharsInReview(reviewersTextFile))
 
 # 2 c) What is the business_id of the top 10 businesses with the most reviews
-def distinctBusinesses(rdd):
-    newRdd = rdd.map(lambda x: x.split()[2]).distinct()
-    return newRdd.count()
+def top10BusinessesWithMostReviews():
+    print("c): Top 10 businesses with the most reviews")
+    textFile = sc.textFile(reviewerspath)
+    reviewLinesRdd = textFile.map(lambda line: line.split('\t'))
+    countPerBusinessRdd = reviewLinesRdd.map(lambda fields: (fields[2], 1)).reduceByKey(lambda count1, count2: count1 + count2)
+    countPerBusinessTop10 = countPerBusinessRdd.takeOrdered(10, key = lambda x: -x[1])
+    for business in countPerBusinessTop10:
+        print(business[0])
+        print(business[1])
 
-reviewersTextFile = sc.textFile(reviewerspath)
-
-print("distinct users: " + str(distinctUsers(reviewersTextFile)))
-
-print("distinct businesses: " + str(distinctBusinesses(reviewersTextFile)))
-
-
+top10BusinessesWithMostReviews()
