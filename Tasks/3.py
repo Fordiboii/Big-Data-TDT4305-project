@@ -1,7 +1,7 @@
 import findspark
 import base64
 findspark.init("/home/olekfur/spark")
-import operator
+from operator import add
 
 from pyspark import SparkContext, SparkConf
 
@@ -20,11 +20,24 @@ def averageCityRating():
     headers = textFile.first()
     textFile = textFile.filter(lambda line: line != headers)
     businessesLinesRdd = textFile.map(lambda line: line.split('\t'))
-    citiesWithNumberOfReviews = businessesLinesRdd.map(lambda fields: (fields[3], fields[8])).countByKey()
-    citiesWithAggregatedRatings = businessesLinesRdd.map(lambda fields: (fields[3], fields[8])).aggregateByKey(0,lambda v1,v2: v1+1\
-,operator.add).collect()
-    for x in range(10):
-        print(citiesWithNumberOfReviews[x])
+    citiesAndRatings = businessesLinesRdd.map(lambda fields: (str(fields[3]), int(fields[8]))).take(20)
+    print("City and rating")
+    for city in citiesAndRatings:
+        print(city)
+    print("///////////////////")
+    print("Number of reviews in each city")
+    # countByKey returns a hashmap. TODO hashMap => key-value pair for later join with other rdd.
+    citiesNumberOfReviews = sc.parallelize(citiesAndRatings).countByKey()
+    for city in citiesNumberOfReviews:
+        print(str(city) + ": " + str(citiesNumberOfReviews[city]))
+    print("///////////////////")
+    print("Sum of reviews for each city")
+    citiesAggregatedRatings = sc.parallelize(citiesAndRatings).reduceByKey(lambda a,b: int(a)+int(b)).collect()
+    print(citiesAggregatedRatings)
+    print("////////////////////")
+    print("City with number of reviews and sum of reviews")
+    citiesNumberAndAggregate = sc.parallelize(citiesNumberOfReviews).union(sc.parallelize(citiesAggregatedRatings)).collect()
+    print(citiesNumberAndAggregate)
 
 
 averageCityRating()
