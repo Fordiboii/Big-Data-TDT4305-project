@@ -42,8 +42,9 @@ def averageCityRating():
 
     #
 
-    rdd1 = citiesAndRatings.aggregateByKey((0, 0), lambda  a,b:(a[0] + b, a[1]+ 1), lambda a,b: (a[0] + b[0], a[1] + b[1])).mapValues(lambda v: round(v[0]/v[1], 1)).collect()
-    print(rdd1)
+    avgRatings = citiesAndRatings.aggregateByKey((0, 0), lambda  a,b:(a[0] + b, a[1]+ 1), lambda a,b: (a[0] + b[0], a[1] + b[1])).mapValues(lambda v: round(v[0]/v[1], 1)).collect()
+    print(avgRatings)
+    return avgRatings
 
 
 averageCityRating()
