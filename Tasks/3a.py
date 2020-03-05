@@ -11,8 +11,6 @@ sparkConf = SparkConf().setAppName("Yelp").setMaster("local")
 sc = SparkContext(conf = sparkConf)
 
 # 3 a) What is the average rating for businesses in each city
-def sumFunc(a, b):
-    return a+b
 
 def averageCityRating():
     print("e): Average rating for businesses in each city")
@@ -21,6 +19,9 @@ def averageCityRating():
     textFile = textFile.filter(lambda line: line != headers)
     businessesLinesRdd = textFile.map(lambda line: line.split('\t'))
     citiesAndRatings = businessesLinesRdd.map(lambda fields: (str(fields[3]), float(fields[8]))).take(50)
+
+    #Helper-code
+
     #print("City and rating")
     #for city in citiesAndRatings:
     #    print(city)
@@ -38,6 +39,9 @@ def averageCityRating():
     #citiesNumberAndAggregate = sc.parallelize(citiesNumberOfReviews).union(sc.parallelize(citiesAggregatedRatings)).collect()
     #print(citiesNumberAndAggregate)
     #print("////////////////////")
+
+    #
+
     rdd1 = sc.parallelize(citiesAndRatings).aggregateByKey((0, 0), lambda  a,b:(a[0] + b, a[1]+ 1), lambda a,b: (a[0] + b[0], a[1] + b[1])).mapValues(lambda v: v[0]/v[1]).collect()
     print(rdd1)
 
