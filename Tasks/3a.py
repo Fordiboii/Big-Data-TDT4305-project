@@ -18,7 +18,7 @@ def averageCityRating():
     headers = textFile.first()
     textFile = textFile.filter(lambda line: line != headers)
     businessesLinesRdd = textFile.map(lambda line: line.split('\t'))
-    citiesAndRatings = businessesLinesRdd.map(lambda fields: (str(fields[3]), float(fields[8]))).take(50)
+    citiesAndRatings = businessesLinesRdd.map(lambda fields: (fields[3], float(fields[8])))
 
     #Helper-code
 
@@ -42,7 +42,7 @@ def averageCityRating():
 
     #
 
-    rdd1 = sc.parallelize(citiesAndRatings).aggregateByKey((0, 0), lambda  a,b:(a[0] + b, a[1]+ 1), lambda a,b: (a[0] + b[0], a[1] + b[1])).mapValues(lambda v: v[0]/v[1]).collect()
+    rdd1 = citiesAndRatings.aggregateByKey((0, 0), lambda  a,b:(a[0] + b, a[1]+ 1), lambda a,b: (a[0] + b[0], a[1] + b[1])).mapValues(lambda v: round(v[0]/v[1], 1)).collect()
     print(rdd1)
 
 

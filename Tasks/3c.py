@@ -27,12 +27,12 @@ def postalCodeCentroids():
 
     
 def postalCodeLat(rdd):
-    return rdd.map(lambda fields: (str(fields[5]), float(fields[6])))
+    return rdd.map(lambda fields: (fields[5], float(fields[6])))
 
 def postalCodeLong(rdd):
-    return rdd.map(lambda fields: (str(fields[5]), float(fields[7])))
+    return rdd.map(lambda fields: (fields[5], float(fields[7])))
 
 def averageCoordinate(postalCoordList):
-    return postalCoordList.aggregateByKey((0,0), lambda a,b:(a[0] + b, a[1] + 1), lambda a,b: (a[0] + b[0], a[1] + b[1])).mapValues(lambda v: v[0]/v[1])
+    return postalCoordList.aggregateByKey((0,0), lambda a,b:(a[0] + b, a[1] + 1), lambda a,b: (a[0] + b[0], a[1] + b[1])).mapValues(lambda v: round(v[0]/v[1], 3))
 
 postalCodeCentroids()
