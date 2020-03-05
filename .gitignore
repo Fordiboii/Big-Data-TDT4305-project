@@ -130,7 +130,7 @@ dmypy.json
 
 #Data sources
 data/
-
+output2c/
 output3a/
 output3b/
 output3c/

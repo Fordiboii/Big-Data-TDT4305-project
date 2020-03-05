@@ -10,35 +10,33 @@ sparkConf = SparkConf().setAppName("Yelp").setMaster("local")
 sc = SparkContext(conf = sparkConf)
 
 # 2 a) How many distinct users are there in the dataset
-def distinctUsers(rdd):
-    newRdd = rdd.map(lambda x: x.split()[1]).distinct()
-    return newRdd.count()
+def distinctUsers():
+    textFile = sc.textFile(reviewerspath)
+    newRdd = textFile.map(lambda x: x.split()[1]).distinct()
+    amount = newRdd.count()
+    print(amount)
+    return amount
 
 # 2 b) How many what is the average number of the characters in a user review
-def avgNumOfCharsInReview(rdd):
-    newRdd = rdd.map(lambda x: x.split()[3]).filter(lambda y: y != u'"review_text"')
+def avgNumOfCharsInReview():
+    textFile = sc.textFile(reviewerspath)
+    newRdd = textFile.map(lambda x: x.split()[3]).filter(lambda y: y != u'"review_text"')
     numberOfReviews = newRdd.count()
     totalLength = newRdd.map(lambda review: len(base64.b64decode(review))).reduce(lambda a, b: a + b)
+    print(totalLength/numberOfReviews)
     return totalLength/numberOfReviews
-
-if __name__ == "__main__":
-    reviewersTextFile = sc.textFile(reviewerspath)
-
-    #print("2 a) Distinct users: ")
-    #print(distinctUsers(reviewersTextFile))
-    print("2 b) Avg. no. of chars in review: ")
-    print(avgNumOfCharsInReview(reviewersTextFile))
 
 # 2 c) What is the business_id of the top 10 businesses with the most reviews
 def top10BusinessesWithMostReviews():
-    print("c): Top 10 businesses with the most reviews")
     textFile = sc.textFile(reviewerspath)
     reviewLinesRdd = textFile.map(lambda line: line.split('\t'))
     countPerBusinessRdd = reviewLinesRdd.map(lambda fields: (fields[2], 1)).reduceByKey(lambda count1, count2: count1 + count2)
     countPerBusinessTop10 = countPerBusinessRdd.takeOrdered(10, key = lambda x: -x[1])
+    sc.parallelize(countPerBusinessTop10).saveAsTextFile("output2c")
     for business in countPerBusinessTop10:
         print(business[0])
         print(business[1])
+    return countPerBusinessTop10
 
 # 2 e) What is the time and date of the first and last review
 
@@ -53,3 +51,20 @@ def timeAndDateOfFirstAndLastReview():
     maxTime = reviewDatesRdd.reduce(lambda time1, time2: time1 if time1>time2 else time2)
     print("MinTime: " + str(minTime))
     print("MaxTime: " + str(maxTime))
+
+def main():
+    print("-------- (2a) How many distinct users are there in the dataset?")
+    distinctUsers()
+
+    print("-------- (2b) What is the average number of characters in a user review? --------")
+    avgNumOfCharsInReview()
+
+    print("-------- (2c) What is the business id of the top 10 businesses with the most reviews? --------")
+    top10BusinessesWithMostReviews()
+
+    print("-------- (2e) What is the time and date of the first and last review? --------")
+    timeAndDateOfFirstAndLastReview()
+
+
+if __name__ == "__main__":
+    main()
