@@ -69,19 +69,22 @@ def timeAndDateOfFirstAndLastReview():
 
 def main():
     print("-------- (2a) How many distinct users are there in the dataset?")
-    #distinctUsers()
+    distinctUsers()
 
     print("-------- (2b) What is the average number of characters in a user review? --------")
-    #avgNumOfCharsInReview()
+    avgNumOfCharsInReview()
 
     print("-------- (2c) What is the business id of the top 10 businesses with the most reviews? --------")
-    #top10BusinessesWithMostReviews()
+    top10BusinessesWithMostReviews()
 
     print("-------- (2d) What is the number of reviews per year? --------")
     numberofReviewsPerYear()
 
     print("-------- (2e) What is the time and date of the first and last review? --------")
-    #timeAndDateOfFirstAndLastReview()
+    timeAndDateOfFirstAndLastReview()
+
+    print("-------- (2f) TODO --------")
+    #TODO
 
 
 if __name__ == "__main__":
