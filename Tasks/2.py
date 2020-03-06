@@ -1,5 +1,6 @@
 import findspark
 import base64
+from datetime import datetime
 findspark.init("/home/olekfur/spark")
 
 from pyspark import SparkContext, SparkConf
@@ -38,6 +39,20 @@ def top10BusinessesWithMostReviews():
         print(business[1])
     return countPerBusinessTop10
 
+# 2 d) Find the number of reviews per year
+def timestampToYear(timestamp):
+    return str(datetime.utcfromtimestamp(float(timestamp)))[0:4]
+
+def numberofReviewsPerYear():
+    textFile = sc.textFile(reviewerspath)
+    unixTimestampsWithHead = textFile.map(lambda line: line.split()[4])
+    head = unixTimestampsWithHead.first()
+    unixTimestamps = unixTimestampsWithHead.filter(lambda timestamp: timestamp != head)
+    reviewsPerYear = unixTimestamps.map(lambda stamp: (timestampToYear(stamp), 1)).reduceByKey(lambda a, b: a+b).collect()
+    print(reviewsPerYear)
+    sc.parallelize(reviewsPerYear).saveAsTextFile("output2d")
+    return reviewsPerYear
+
 # 2 e) What is the time and date of the first and last review
 
 def timeAndDateOfFirstAndLastReview():
@@ -62,8 +77,14 @@ def main():
     print("-------- (2c) What is the business id of the top 10 businesses with the most reviews? --------")
     top10BusinessesWithMostReviews()
 
+    print("-------- (2d) What is the number of reviews per year? --------")
+    numberofReviewsPerYear()
+
     print("-------- (2e) What is the time and date of the first and last review? --------")
     timeAndDateOfFirstAndLastReview()
+
+    print("-------- (2f) TODO --------")
+    #TODO
 
 
 if __name__ == "__main__":
