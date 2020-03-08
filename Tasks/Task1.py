@@ -1,5 +1,5 @@
 import findspark
-findspark.init("/home/viktorgs/spark-2.4.5-bin-hadoop2.7")
+findspark.init()
 
 from pyspark import SparkContext, SparkConf
 

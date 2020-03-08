@@ -2,7 +2,7 @@ import findspark
 import base64
 from datetime import datetime
 
-findspark.init("/home/viktorgs/spark-2.4.5-bin-hadoop2.7")
+findspark.init()
 
 from pyspark import SparkContext, SparkConf
 
@@ -54,25 +54,65 @@ def timeAndDateOfFirtAndLastReview(reviewsTextFile):
 
 # Subtask f) Calculate the PCC between the number of reviews by a user and the average number of
 #            the characters in the users review.
+def numberOfReviewsPerUser(reviewersTextFile):
+    usersWithHead = reviewersTextFile.map(lambda user: user.split()[1])
+    head = usersWithHead.first()
+    users = usersWithHead.filter(lambda user: user != head)
+    reviewsPerUser = users.map(lambda user: (user, 1)).reduceByKey(lambda a, b: a+b)
+    return reviewsPerUser
+
+def totalReviewsLengthPerUser(reviewersTextFile):
+    reviewsAndUserWithHead = reviewersTextFile.map(lambda line: (line.split()[1], line.split()[3]))
+    head = reviewsAndUserWithHead.first()
+    reviewsAndUser = reviewsAndUserWithHead.filter(lambda reviewAndUser: reviewAndUser != head)
+    reviewLengthPerUser = reviewsAndUser.map(lambda reviewAndUser: (reviewAndUser[0], len(base64.b64decode(reviewAndUser[1])))).reduceByKey(lambda a, b: a+b)
+    return reviewLengthPerUser
+
+def pearson_correlation_coefficient(reviewersTextFile):
+    # 1) Find reviews per user 
+    reviewsPerUser = numberOfReviewsPerUser(reviewersTextFile)
+
+    # 2) Find the average number of reviews per user
+    totalNumberOfUsers = reviewsPerUser.count()
+    totalNumberOfReviews = reviewsPerUser.map(lambda x: x[1]).reduce(lambda a, b: a+b)
+    avgNumberOfReviewsPerUser = totalNumberOfReviews / totalNumberOfUsers
+    
+    # 3) Find the average number of characters in all reviews 
+    avgCharsInReviews = averageCharactersInReviews(reviewersTextFile)
+
+    # 4) Find avg. chars in reviews per user and concatenate with no. of reviews per user
+    totReviewsLengthPerUser = totalReviewsLengthPerUser(reviewersTextFile)
+    newRdd = totReviewsLengthPerUser.join(reviewsPerUser)
+    avgCharsInReviewsPerUser = newRdd.map(lambda userTotalReviewsAndChars: (
+        (userTotalReviewsAndChars[1][0] / userTotalReviewsAndChars[1][1])-avgCharsInReviews, 
+        userTotalReviewsAndChars[1][1]-avgNumberOfReviewsPerUser)
+    )
+
+    # 5) Calculate coefficient
+    nominator = avgCharsInReviewsPerUser.map(lambda a: a[0]*a[1]).reduce(lambda a, b: a+b)
+    denominator_sumX = avgCharsInReviewsPerUser.map(lambda a: a[1]**2).reduce(lambda a, b: a+b)
+    denominator_sumY = avgCharsInReviewsPerUser.map(lambda a: a[0]**2).reduce(lambda a, b: a+b)
+    denominator = (denominator_sumX**(.5)) * (denominator_sumY**(.5))
+    return nominator/denominator
 
 def main():
 
     print("-------- (2a) Number of distinct users: --------")
-    #numberOfDistinctUsers = distinctUsers(reviewersTextFile)
-    #print(numberOfDistinctUsers) # 4522
+    numberOfDistinctUsers = distinctUsers(reviewersTextFile)
+    print(numberOfDistinctUsers) # 4522
 
     print("-------- (2b) Average number of characters in a user review: --------")
-    #averageCharacters = averageCharactersInReviews(reviewersTextFile)
-    #print(averageCharacters) # 857
+    averageCharacters = averageCharactersInReviews(reviewersTextFile)
+    print(averageCharacters) # 857
 
     print("-------- (2c) Business_id of top 10 businesses with most reviews: --------")
-    #topTenBusinesses = topTenBusinessesWithMostReviews(reviewersTextFile)
-    #for business in topTenBusinesses:
-    #    print(business[0], business[1])
+    topTenBusinesses = topTenBusinessesWithMostReviews(reviewersTextFile)
+    for business in topTenBusinesses:
+        print(business[0], business[1])
 
     print("-------- (2d) Number of reviews per year: --------")
-    #reviewsPerYear = numberofReviewsPerYear(reviewersTextFile)
-    #print(reviewsPerYear.collect())
+    reviewsPerYear = numberofReviewsPerYear(reviewersTextFile)
+    print(reviewsPerYear.collect())
 
     print("-------- (2e) Time and date of the first and last review: --------")
     firstReview, lastReview = timeAndDateOfFirtAndLastReview(reviewersTextFile)
@@ -80,6 +120,9 @@ def main():
     utc2 = str(datetime.utcfromtimestamp(float(lastReview)))
     print("First review date: ", utc1)
     print("Last review date: ", utc2)
+
+    print("-------- (2f) Pearson correlation coefficient between no. of reviews and avg. no. of chars in reviews: --------")    
+    print(pearson_correlation_coefficient(reviewersTextFile)) # 0.125036715364  
 
 if __name__ == "__main__":
     main()
