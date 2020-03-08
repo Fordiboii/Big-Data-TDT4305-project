@@ -66,20 +66,20 @@ def medianDegrees(textFile):
 
 def main():
     print("-------- (4a) Top 10 nodes with in and out degress --------")
-    #srcNodes, destNodes = topTenNodes(friendshipTextFile)
-    #print("Top 10 src nodes (most out-degrees)")
-    #for node in srcNodes:
-    #    print(node)
+    srcNodes, destNodes = topTenNodes(friendshipTextFile)
+    print("Top 10 src nodes (most out-degrees)")
+    for node in srcNodes:
+        print(node)
     
-    #print("Top 10 destination nodes (most in-degrees)")
-    #for node in destNodes:
-    #    print(node)
+    print("Top 10 destination nodes (most in-degrees)")
+    for node in destNodes:
+        print(node)
 
     print("-------- (4b) Mean and median for in and out degrees --------")
-    #srcNodesMean, destNodesMean = meanDegrees(friendshipTextFile)
+    srcNodesMean, destNodesMean = meanDegrees(friendshipTextFile)
     srcNodesMedian, destNodesMedian = medianDegrees(friendshipTextFile)
-    #print("Average out-degree: " ,srcNodesMean) # 12
-    #print("Average inn-degree: " ,destNodesMean) # 3
+    print("Average out-degree: " ,srcNodesMean) # 12
+    print("Average inn-degree: " ,destNodesMean) # 3
     print("Median out-degree: ", srcNodesMedian) # 1
     print("Median inn-degree: ", destNodesMedian) # 1
 

@@ -15,6 +15,8 @@ sc = SparkContext(conf = sparkConf)
 
 # Task 5
 
+print("-------- (5a) Load each file in the dataset into separate DataFrames: --------")
+
 sqlContext = SQLContext(sc)
 businessDF = sqlContext.read.csv(businessPath, header=True, sep="\t")
 reviewersDF = sqlContext.read.csv(reviewersPath, header=True, sep="\t")
@@ -38,10 +40,12 @@ sqlContext.sql("select count(*) from friendshipGraph").show()
 
 # Task 6
 
+print("-------- Task (6) --------")
+
 # a) Inner join review table and business table on business_id
 # b) The result is saved in a temporary variable, "innerJoin"
 innerJoin = businessDF.join(reviewersDF, "business_id")
-# innerJoin.show()
+innerJoin.show()
 
 # c) Number of reviews for each user in the review table for top 20 users with the most number of reviews
 reviews = reviewersDF.groupBy("user_id").count().sort(desc("count")).limit(20)
